@@ -1,48 +1,42 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;1,9..144,300&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap');
 @import "tailwindcss";
+@source "../components/**/*.{js,ts,jsx,tsx}";
+@source "../app/**/*.{js,ts,jsx,tsx}";
 
 :root {
-  --bg: #F8F8F6;
-  --surface: #FFFFFF;
-  --surface-2: #F2F2F0;
-  --border: #E4E4E0;
-  --border-strong: #C8C8C4;
-  --text: #141414;
-  --text-2: #6B6B67;
-  --text-3: #9B9B97;
-  --accent: #1A1A1A;
-  --green: #1C6B4A;
-  --green-light: #EBF5EF;
-  --red: #C0392B;
-  --red-light: #FDF0EE;
-  --amber: #B45309;
-  --amber-light: #FEF3C7;
+  --cream: #FAF7F2;
+  --warm-white: #FFF9F0;
+  --charcoal: #1C1C1A;
+  --forest: #2D4A3E;
+  --sage: #7A9E7E;
+  --terracotta: #C4613A;
+  --amber: #E8A838;
+  --soft-brown: #8B7355;
+  --border: #E5DDD0;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html { scroll-behavior: smooth; }
 
 body {
-  background-color: var(--bg);
-  color: var(--text);
-  font-family: 'Inter', sans-serif;
-  font-size: 15px;
-  line-height: 1.6;
+  background-color: var(--cream);
+  color: var(--charcoal);
+  font-family: 'DM Sans', sans-serif;
   -webkit-font-smoothing: antialiased;
 }
 
-.font-display { font-family: 'Fraunces', serif; }
+.font-display { font-family: 'Playfair Display', serif; }
 
-::-webkit-scrollbar { width: 5px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 99px; }
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--cream); }
+::-webkit-scrollbar-thumb { background: var(--sage); border-radius: 3px; }
 
 @keyframes fadeUp {
-  from { opacity: 0; transform: translateY(10px); }
+  from { opacity: 0; transform: translateY(12px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 @keyframes pulse-dot {
-  0%, 80%, 100% { transform: scale(0.5); opacity: 0.3; }
+  0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
   40%            { transform: scale(1);   opacity: 1; }
 }
 @keyframes shimmer {
@@ -50,48 +44,22 @@ body {
   to   { background-position:  200% 0; }
 }
 
-.animate-fadeUp { animation: fadeUp 0.25s ease forwards; }
+.animate-fadeUp { animation: fadeUp 0.3s ease forwards; }
 
 .dot-pulse span { animation: pulse-dot 1.2s infinite ease-in-out; }
-.dot-pulse span:nth-child(2) { animation-delay: 0.15s; }
-.dot-pulse span:nth-child(3) { animation-delay: 0.3s; }
+.dot-pulse span:nth-child(2) { animation-delay: 0.2s; }
+.dot-pulse span:nth-child(3) { animation-delay: 0.4s; }
 
 .skeleton {
-  background: linear-gradient(90deg, var(--surface-2) 25%, var(--border) 50%, var(--surface-2) 75%);
+  background: linear-gradient(90deg, #ede8e0 25%, #e0d9cf 50%, #ede8e0 75%);
   background-size: 200% 100%;
   animation: shimmer 1.4s infinite;
 }
 
 .recipe-card {
-  transition: box-shadow 0.2s ease, transform 0.2s ease;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
 .recipe-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+  transform: translateY(-4px);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.12);
 }
-
-.btn-primary {
-  background: var(--accent);
-  color: white;
-  border-radius: 10px;
-  font-weight: 500;
-  font-size: 14px;
-  padding: 10px 20px;
-  transition: opacity 0.15s;
-  cursor: pointer;
-  border: none;
-}
-.btn-primary:hover { opacity: 0.85; }
-.btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
-
-.input-base {
-  background: var(--surface);
-  border: 1.5px solid var(--border);
-  border-radius: 10px;
-  color: var(--text);
-  font-size: 14px;
-  font-family: 'Inter', sans-serif;
-  outline: none;
-  transition: border-color 0.15s;
-}
-.input-base:focus { border-color: var(--accent); }
