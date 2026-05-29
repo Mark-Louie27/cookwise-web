@@ -79,30 +79,27 @@ export default function SearchBar({ initialQ = "", onSearch, loading }: Props) {
   }, []);
 
   return (
-    <div style={{ width: "100%", display: "flex", flexDirection: "column", gap: "12px" }} data-search-container>
+    <div style={{ width: "100%", display: "flex", flexDirection: "column", gap: "10px" }} data-search-container>
       <form onSubmit={submit} style={{ width: "100%" }}>
-        <div style={{ display: "flex", gap: "10px", width: "100%" }}>
+        <div style={{ display: "flex", gap: "8px", width: "100%", alignItems: "center" }}>
 
           {/* Main Input */}
           <div style={{ position: "relative", flex: 1, minWidth: 0 }}>
-            {/* Focus glow */}
-            <div
-              style={{
-                position: "absolute", inset: "-2px", borderRadius: "20px",
-                pointerEvents: "none", transition: "opacity 0.3s",
-                background: "linear-gradient(135deg, var(--terracotta), var(--amber))",
-                opacity: isFocused ? 0.15 : 0, filter: "blur(8px)",
-              }}
-            />
             <div
               style={{
                 position: "relative", display: "flex", alignItems: "center",
-                borderRadius: "16px", border: `2px solid ${isFocused ? "var(--terracotta)" : "var(--border)"}`,
-                backgroundColor: "white", overflow: "hidden", transition: "all 0.2s",
-                boxShadow: isFocused ? "0 4px 20px rgba(0,0,0,0.08)" : "0 2px 8px rgba(0,0,0,0.04)",
+                borderRadius: "10px",
+                border: `1.5px solid ${isFocused ? "var(--terracotta)" : "var(--border)"}`,
+                backgroundColor: "white",
+                transition: "border-color 0.2s, box-shadow 0.2s",
+                boxShadow: isFocused ? "0 0 0 3px rgba(196,97,58,0.12)" : "none",
+                height: "42px",
               }}
             >
-              <Search size={18} style={{ position: "absolute", left: "16px", pointerEvents: "none", color: isFocused ? "var(--terracotta)" : "var(--soft-brown)" }} />
+              <Search
+                size={15}
+                style={{ position: "absolute", left: "12px", pointerEvents: "none", color: isFocused ? "var(--terracotta)" : "var(--soft-brown)", flexShrink: 0 }}
+              />
               <input
                 ref={inputRef}
                 value={q}
@@ -110,75 +107,119 @@ export default function SearchBar({ initialQ = "", onSearch, loading }: Props) {
                 onFocus={() => setIsFocused(true)}
                 onKeyDown={handleKeyDown}
                 placeholder="Search recipes, ingredients, cuisines..."
-                style={{ width: "100%", paddingLeft: "44px", paddingRight: "96px", paddingTop: "14px", paddingBottom: "14px", fontSize: "14px", outline: "none", background: "transparent", color: "var(--charcoal)" }}
+                style={{
+                  width: "100%", paddingLeft: "36px", paddingRight: q ? "32px" : "12px",
+                  fontSize: "13px", outline: "none", background: "transparent",
+                  color: "var(--charcoal)", height: "100%", border: "none",
+                }}
                 autoComplete="off"
               />
-              <div style={{ position: "absolute", right: "8px", display: "flex", alignItems: "center", gap: "4px" }}>
-                {q && (
-                  <button type="button" onClick={() => { setQ(""); inputRef.current?.focus(); }}
-                    className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors"
-                    style={{ border: "none", background: "transparent", cursor: "pointer" }}>
-                    <X size={14} style={{ color: "var(--soft-brown)" }} />
-                  </button>
-                )}
-                {hasFilters && (
-                  <span className="flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider"
-                    style={{ backgroundColor: "var(--terracotta)", color: "white" }}>
-                    <Sparkles size={10} />
-                    {[mealType, DIETS.find((d) => d.value === diet)?.label].filter(Boolean).length}
-                  </span>
-                )}
-              </div>
+              {q && (
+                <button
+                  type="button"
+                  onClick={() => { setQ(""); inputRef.current?.focus(); }}
+                  style={{ position: "absolute", right: "8px", padding: "4px", borderRadius: "6px", border: "none", background: "transparent", cursor: "pointer", display: "flex", alignItems: "center" }}
+                >
+                  <X size={13} style={{ color: "var(--soft-brown)" }} />
+                </button>
+              )}
             </div>
 
             {/* Quick Search Dropdown */}
             {isFocused && !q && (
-              <div style={{ position: "absolute", top: "100%", left: 0, right: 0, marginTop: "8px", borderRadius: "16px", border: `1px solid var(--border)`, overflow: "hidden", zIndex: 50, backgroundColor: "white", boxShadow: "0 20px 40px rgba(0,0,0,0.12)" }}>
-                <div className="px-4 py-3">
-                  <p className="text-[11px] font-semibold uppercase tracking-wider mb-2" style={{ color: "var(--soft-brown)" }}>Quick Searches</p>
-                  <div className="flex flex-wrap gap-2">
+              <div style={{
+                position: "absolute", top: "calc(100% + 6px)", left: 0, right: 0,
+                borderRadius: "12px", border: `1px solid var(--border)`,
+                overflow: "hidden", zIndex: 50, backgroundColor: "white",
+                boxShadow: "0 8px 24px rgba(0,0,0,0.1)",
+              }}>
+                <div style={{ padding: "10px 12px" }}>
+                  <p style={{ fontSize: "10px", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: "8px", color: "var(--soft-brown)" }}>
+                    Quick searches
+                  </p>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
                     {QUICK_SEARCHES.map((term, idx) => (
-                      <button key={term} type="button"
+                      <button
+                        key={term} type="button"
                         onClick={() => { setQ(term); inputRef.current?.focus(); }}
-                        className="px-3 py-1.5 rounded-lg text-sm transition-all duration-150"
-                        style={{ border: `1px solid ${activeQuickIndex === idx ? "var(--terracotta)" : "var(--border)"}`, backgroundColor: activeQuickIndex === idx ? "rgba(194,65,12,0.08)" : "var(--cream)", color: activeQuickIndex === idx ? "var(--terracotta)" : "var(--charcoal)", cursor: "pointer" }}
+                        style={{
+                          padding: "4px 10px", borderRadius: "6px", fontSize: "12px",
+                          border: `1px solid ${activeQuickIndex === idx ? "var(--terracotta)" : "var(--border)"}`,
+                          backgroundColor: activeQuickIndex === idx ? "rgba(196,97,58,0.08)" : "var(--cream)",
+                          color: activeQuickIndex === idx ? "var(--terracotta)" : "var(--charcoal)",
+                          cursor: "pointer", transition: "all 0.15s",
+                        }}
                         onMouseEnter={() => setActiveQuickIndex(idx)}
-                        onMouseLeave={() => setActiveQuickIndex(-1)}>
+                        onMouseLeave={() => setActiveQuickIndex(-1)}
+                      >
                         {term}
                       </button>
                     ))}
                   </div>
                 </div>
-                <div className="px-4 py-2.5 border-t flex items-center gap-2 text-xs" style={{ borderColor: "var(--border)", color: "var(--soft-brown)" }}>
-                  <kbd className="px-1.5 py-0.5 rounded bg-gray-100 font-mono text-[10px]">↵</kbd> to search
-                  <span className="mx-1">·</span>
-                  <kbd className="px-1.5 py-0.5 rounded bg-gray-100 font-mono text-[10px]">esc</kbd> to close
+                <div style={{ padding: "8px 12px", borderTop: `1px solid var(--border)`, display: "flex", alignItems: "center", gap: "6px", fontSize: "11px", color: "var(--soft-brown)" }}>
+                  <kbd style={{ padding: "1px 5px", borderRadius: "4px", backgroundColor: "#f3f4f6", fontFamily: "monospace", fontSize: "10px" }}>↵</kbd> search
+                  <span style={{ margin: "0 2px", opacity: 0.5 }}>·</span>
+                  <kbd style={{ padding: "1px 5px", borderRadius: "4px", backgroundColor: "#f3f4f6", fontFamily: "monospace", fontSize: "10px" }}>esc</kbd> close
                 </div>
               </div>
             )}
           </div>
 
           {/* Filters Toggle */}
-          <button type="button" onClick={() => setShowFilters(!showFilters)}
-            className="relative shrink-0 flex items-center gap-2 text-sm font-medium transition-all duration-200"
-            style={{ padding: "0 16px", borderRadius: "16px", border: `2px solid ${showFilters ? "var(--terracotta)" : "var(--border)"}`, backgroundColor: showFilters ? "var(--terracotta)" : "white", color: showFilters ? "white" : "var(--soft-brown)", cursor: "pointer", boxShadow: showFilters ? "0 4px 12px rgba(194,65,12,0.25)" : "0 2px 8px rgba(0,0,0,0.04)" }}>
-            <SlidersHorizontal size={15} />
-            <span className="hidden sm:inline">Filters</span>
-            {hasFilters && !showFilters && (
-              <span className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full text-white text-[10px] font-bold flex items-center justify-center"
-                style={{ backgroundColor: "var(--amber)" }}>
-                {[mealType, DIETS.find((d) => d.value === diet)?.label].filter(Boolean).length}
+          <button
+            type="button"
+            onClick={() => setShowFilters(!showFilters)}
+            style={{
+              position: "relative", flexShrink: 0,
+              height: "42px", padding: "0 14px",
+              borderRadius: "10px",
+              border: `1.5px solid ${showFilters ? "var(--terracotta)" : "var(--border)"}`,
+              backgroundColor: showFilters ? "var(--terracotta)" : "white",
+              color: showFilters ? "white" : "var(--soft-brown)",
+              cursor: "pointer", display: "flex", alignItems: "center", gap: "6px",
+              fontSize: "13px", fontWeight: 500, transition: "all 0.2s",
+              whiteSpace: "nowrap",
+            }}
+          >
+            <SlidersHorizontal size={14} />
+            <span>Filters</span>
+            {hasFilters && (
+              <span style={{
+                display: "inline-flex", alignItems: "center", justifyContent: "center",
+                width: "16px", height: "16px", borderRadius: "50%",
+                backgroundColor: showFilters ? "rgba(255,255,255,0.3)" : "var(--amber)",
+                color: showFilters ? "white" : "var(--charcoal)",
+                fontSize: "10px", fontWeight: 700,
+              }}>
+                {[mealType, diet].filter(Boolean).length}
               </span>
             )}
           </button>
 
           {/* Search Button */}
-          <button type="submit" disabled={loading}
-            className="shrink-0 flex items-center gap-2 text-sm font-semibold text-white transition-all duration-200 disabled:cursor-not-allowed whitespace-nowrap"
-            style={{ padding: "0 24px", borderRadius: "16px", backgroundColor: "var(--terracotta)", border: "none", cursor: loading ? "not-allowed" : "pointer", boxShadow: "0 4px 14px rgba(194,65,12,0.35)" }}
-            onMouseEnter={(e) => { if (!loading) { e.currentTarget.style.transform = "translateY(-1px)"; e.currentTarget.style.boxShadow = "0 6px 20px rgba(194,65,12,0.45)"; } }}
-            onMouseLeave={(e) => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "0 4px 14px rgba(194,65,12,0.35)"; }}>
-            {loading ? <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> : <Search size={15} />}
+          <button
+            type="submit"
+            disabled={loading}
+            style={{
+              flexShrink: 0, height: "42px", padding: "0 18px",
+              borderRadius: "10px", border: "none",
+              backgroundColor: "var(--terracotta)", color: "white",
+              fontSize: "13px", fontWeight: 600,
+              cursor: loading ? "not-allowed" : "pointer",
+              display: "flex", alignItems: "center", gap: "6px",
+              whiteSpace: "nowrap", transition: "opacity 0.2s, transform 0.15s",
+              boxShadow: "0 2px 8px rgba(196,97,58,0.3)",
+            }}
+            onMouseEnter={(e) => { if (!loading) e.currentTarget.style.opacity = "0.9"; }}
+            onMouseLeave={(e) => { e.currentTarget.style.opacity = "1"; }}
+            onMouseDown={(e) => { e.currentTarget.style.transform = "scale(0.97)"; }}
+            onMouseUp={(e) => { e.currentTarget.style.transform = "scale(1)"; }}
+          >
+            {loading
+              ? <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              : <Search size={14} />
+            }
             <span>{loading ? "Searching…" : "Search"}</span>
           </button>
         </div>
@@ -186,41 +227,62 @@ export default function SearchBar({ initialQ = "", onSearch, loading }: Props) {
 
       {/* Filters Panel */}
       {showFilters && (
-        <div className="rounded-2xl border p-5" style={{ backgroundColor: "white", borderColor: "var(--border)", boxShadow: "0 8px 30px rgba(0,0,0,0.06)" }}>
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-sm font-semibold flex items-center gap-2" style={{ color: "var(--charcoal)" }}>
-              <SlidersHorizontal size={14} style={{ color: "var(--terracotta)" }} /> Filter Options
-            </h3>
+        <div style={{
+          borderRadius: "12px", border: `1px solid var(--border)`,
+          padding: "14px 16px", backgroundColor: "white",
+          boxShadow: "0 4px 16px rgba(0,0,0,0.06)",
+          display: "flex", flexDirection: "column", gap: "12px",
+        }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            <span style={{ fontSize: "11px", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.07em", color: "var(--soft-brown)", display: "flex", alignItems: "center", gap: "6px" }}>
+              <SlidersHorizontal size={12} style={{ color: "var(--terracotta)" }} />
+              Filter options
+            </span>
             {hasFilters && (
-              <button type="button" onClick={clearAll} className="text-xs font-medium hover:underline" style={{ color: "var(--terracotta)", background: "none", border: "none", cursor: "pointer" }}>Clear all</button>
+              <button type="button" onClick={clearAll} style={{ fontSize: "11px", color: "var(--terracotta)", background: "none", border: "none", cursor: "pointer", textDecoration: "underline" }}>
+                Clear all
+              </button>
             )}
           </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "16px" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "12px" }}>
+            {/* Meal Type */}
             <div>
-              <label className="text-xs font-semibold uppercase tracking-wider block mb-2" style={{ color: "var(--soft-brown)" }}>Meal Type</label>
-              <div className="flex flex-wrap gap-2">
+              <p style={{ fontSize: "10px", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.07em", color: "var(--soft-brown)", marginBottom: "6px" }}>Meal type</p>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "5px" }}>
                 {MEAL_TYPES.map((m) => {
                   const active = mealType === m;
                   return (
                     <button key={m || "all-meals"} type="button" onClick={() => setMealType(active ? "" : m)}
-                      className="px-3 py-2 rounded-xl text-xs font-medium transition-all duration-150"
-                      style={{ border: `1px solid ${active ? "var(--terracotta)" : "var(--border)"}`, backgroundColor: active ? "rgba(194,65,12,0.08)" : "var(--cream)", color: active ? "var(--terracotta)" : "var(--charcoal)", cursor: "pointer" }}>
+                      style={{
+                        padding: "3px 10px", borderRadius: "6px", fontSize: "12px", fontWeight: 500,
+                        border: `1px solid ${active ? "var(--terracotta)" : "var(--border)"}`,
+                        backgroundColor: active ? "rgba(196,97,58,0.08)" : "var(--cream)",
+                        color: active ? "var(--terracotta)" : "var(--charcoal)",
+                        cursor: "pointer", transition: "all 0.15s",
+                      }}>
                       {m || "All"}
                     </button>
                   );
                 })}
               </div>
             </div>
+
+            {/* Diet */}
             <div>
-              <label className="text-xs font-semibold uppercase tracking-wider block mb-2" style={{ color: "var(--soft-brown)" }}>Dietary Preference</label>
-              <div className="flex flex-wrap gap-2">
+              <p style={{ fontSize: "10px", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.07em", color: "var(--soft-brown)", marginBottom: "6px" }}>Dietary preference</p>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "5px" }}>
                 {DIETS.map((d) => {
                   const active = diet === d.value;
                   return (
                     <button key={d.value || "all-diets"} type="button" onClick={() => setDiet(active ? "" : d.value)}
-                      className="px-3 py-2 rounded-xl text-xs font-medium transition-all duration-150"
-                      style={{ border: `1px solid ${active ? "var(--terracotta)" : "var(--border)"}`, backgroundColor: active ? "rgba(194,65,12,0.08)" : "var(--cream)", color: active ? "var(--terracotta)" : "var(--charcoal)", cursor: "pointer" }}>
+                      style={{
+                        padding: "3px 10px", borderRadius: "6px", fontSize: "12px", fontWeight: 500,
+                        border: `1px solid ${active ? "var(--terracotta)" : "var(--border)"}`,
+                        backgroundColor: active ? "rgba(196,97,58,0.08)" : "var(--cream)",
+                        color: active ? "var(--terracotta)" : "var(--charcoal)",
+                        cursor: "pointer", transition: "all 0.15s",
+                      }}>
                       {d.label}
                     </button>
                   );
@@ -229,19 +291,20 @@ export default function SearchBar({ initialQ = "", onSearch, loading }: Props) {
             </div>
           </div>
 
+          {/* Active filters */}
           {hasFilters && (
-            <div className="pt-3 mt-4 border-t flex items-center gap-2 flex-wrap" style={{ borderColor: "var(--border)" }}>
-              <span className="text-xs font-medium" style={{ color: "var(--soft-brown)" }}>Active:</span>
+            <div style={{ paddingTop: "10px", borderTop: `1px solid var(--border)`, display: "flex", alignItems: "center", gap: "6px", flexWrap: "wrap" }}>
+              <span style={{ fontSize: "11px", color: "var(--soft-brown)" }}>Active:</span>
               {mealType && (
-                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium" style={{ backgroundColor: "rgba(194,65,12,0.1)", color: "var(--terracotta)" }}>
+                <span style={{ display: "inline-flex", alignItems: "center", gap: "3px", padding: "2px 8px", borderRadius: "6px", fontSize: "11px", fontWeight: 500, backgroundColor: "rgba(196,97,58,0.1)", color: "var(--terracotta)" }}>
                   {mealType}
-                  <button type="button" onClick={() => setMealType("")} style={{ background: "none", border: "none", cursor: "pointer", display: "flex", opacity: 0.7 }}><X size={12} /></button>
+                  <button type="button" onClick={() => setMealType("")} style={{ background: "none", border: "none", cursor: "pointer", display: "flex", padding: 0 }}><X size={11} /></button>
                 </span>
               )}
               {diet && (
-                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium" style={{ backgroundColor: "rgba(194,65,12,0.1)", color: "var(--terracotta)" }}>
+                <span style={{ display: "inline-flex", alignItems: "center", gap: "3px", padding: "2px 8px", borderRadius: "6px", fontSize: "11px", fontWeight: 500, backgroundColor: "rgba(196,97,58,0.1)", color: "var(--terracotta)" }}>
                   {DIETS.find((d) => d.value === diet)?.label}
-                  <button type="button" onClick={() => setDiet("")} style={{ background: "none", border: "none", cursor: "pointer", display: "flex", opacity: 0.7 }}><X size={12} /></button>
+                  <button type="button" onClick={() => setDiet("")} style={{ background: "none", border: "none", cursor: "pointer", display: "flex", padding: 0 }}><X size={11} /></button>
                 </span>
               )}
             </div>

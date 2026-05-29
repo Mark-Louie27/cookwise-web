@@ -6,6 +6,10 @@ export const metadata: Metadata = {
   description: "Discover recipes, get AI cooking help, and save favourites for offline use.",
   manifest: "/manifest.json",
   appleWebApp: { capable: true, statusBarStyle: "default", title: "CookWise" },
+  icons: {
+    icon: "/favicon.ico",          // browser tab icon
+    apple: "/apple-touch-icon.png", // iOS home screen icon
+  },
 };
 
 export const viewport: Viewport = {

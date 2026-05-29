@@ -6,7 +6,7 @@ import type { ChatMessage } from "@/types";
 function TypingDots() {
   return (
     <div className="flex items-center gap-1 py-1 dot-pulse">
-      {[0,1,2].map((i) => (
+      {[0, 1, 2].map((i) => (
         <span key={i} className="w-2 h-2 rounded-full block" style={{ backgroundColor: "var(--sage)" }} />
       ))}
     </div>
@@ -43,57 +43,92 @@ export default function ChatWidget() {
       setMessages((m) => [...m, { role: "assistant", content: data.content || "Sorry, try again." }]);
     } catch {
       setMessages((m) => [...m, { role: "assistant", content: "Network error. Please try again." }]);
-    } finally { setLoading(false); }
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <>
+      {/* Toggle button */}
       {!open && (
         <button
           onClick={() => setOpen(true)}
-          className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full shadow-xl flex items-center justify-center transition-all hover:scale-110"
-          style={{ backgroundColor: "var(--terracotta)" }}
+          className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full shadow-xl flex items-center justify-center transition-all hover:scale-110 active:scale-95"
+          style={{ backgroundColor: "var(--terracotta)", border: "none", cursor: "pointer" }}
         >
           <MessageCircle size={26} color="white" />
         </button>
       )}
 
+      {/* Chat panel */}
       {open && (
         <div
-          className="fixed bottom-6 right-6 z-50 flex flex-col rounded-2xl shadow-2xl overflow-hidden border"
-          style={{ width: "360px", maxWidth: "calc(100vw-2rem)", height: "520px", backgroundColor: "white", borderColor: "var(--border)" }}
+          className="fixed bottom-6 right-6 z-50 rounded-2xl shadow-2xl overflow-hidden"
+          style={{
+            width: "360px",
+            maxWidth: "calc(100vw - 2rem)",
+            height: "520px",
+            backgroundColor: "white",
+            border: "1px solid var(--border)",
+            display: "flex",
+            flexDirection: "column",
+          }}
         >
-          <div className="flex items-center gap-3 px-4 py-3" style={{ backgroundColor: "var(--forest)" }}>
-            <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ backgroundColor: "var(--terracotta)" }}>
+          {/* Header */}
+          <div
+            className="flex items-center gap-3 px-4 py-3 shrink-0"
+            style={{ backgroundColor: "var(--forest)" }}
+          >
+            <div
+              className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
+              style={{ backgroundColor: "var(--terracotta)" }}
+            >
               <ChefHat size={20} color="white" />
             </div>
-            <div className="flex-1">
+            <div style={{ flex: 1 }}>
               <p className="text-white font-semibold text-sm">CookWise AI Chef</p>
               <p className="text-xs" style={{ color: "rgba(255,255,255,0.6)" }}>Powered by Groq · Llama 3.3</p>
             </div>
-            <button onClick={() => setOpen(false)} className="text-white/70 hover:text-white transition-colors">
+            <button
+              onClick={() => setOpen(false)}
+              className="transition-colors hover:opacity-100"
+              style={{ color: "rgba(255,255,255,0.7)", background: "none", border: "none", cursor: "pointer", display: "flex" }}
+            >
               <X size={20} />
             </button>
           </div>
 
-          <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3">
+          {/* Messages */}
+          <div
+            style={{ flex: 1, overflowY: "auto", padding: "16px", display: "flex", flexDirection: "column", gap: "12px" }}
+          >
             {messages.map((msg, i) => (
-              <div key={i} className={`animate-fadeUp flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
+              <div
+                key={i}
+                className="animate-fadeUp"
+                style={{ display: "flex", justifyContent: msg.role === "user" ? "flex-end" : "flex-start" }}
+              >
                 <div
-                  className="max-w-[85%] px-4 py-3 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap"
-                  style={
-                    msg.role === "user"
+                  style={{
+                    maxWidth: "85%",
+                    padding: "12px 16px",
+                    borderRadius: "16px",
+                    fontSize: "14px",
+                    lineHeight: 1.6,
+                    whiteSpace: "pre-wrap",
+                    ...(msg.role === "user"
                       ? { backgroundColor: "var(--forest)", color: "white", borderBottomRightRadius: "4px" }
-                      : { backgroundColor: "var(--cream)", color: "var(--charcoal)", borderBottomLeftRadius: "4px" }
-                  }
+                      : { backgroundColor: "var(--cream)", color: "var(--charcoal)", borderBottomLeftRadius: "4px" }),
+                  }}
                 >
                   {msg.content}
                 </div>
               </div>
             ))}
             {loading && (
-              <div className="flex justify-start">
-                <div className="px-4 py-3 rounded-2xl" style={{ backgroundColor: "var(--cream)", borderBottomLeftRadius: "4px" }}>
+              <div style={{ display: "flex", justifyContent: "flex-start" }}>
+                <div style={{ padding: "12px 16px", borderRadius: "16px", borderBottomLeftRadius: "4px", backgroundColor: "var(--cream)" }}>
                   <TypingDots />
                 </div>
               </div>
@@ -101,7 +136,11 @@ export default function ChatWidget() {
             <div ref={bottomRef} />
           </div>
 
-          <div className="px-4 py-3 border-t flex gap-2" style={{ borderColor: "var(--border)" }}>
+          {/* Input */}
+          <div
+            className="shrink-0 flex gap-2 px-4 py-3 border-t"
+            style={{ borderColor: "var(--border)" }}
+          >
             <input
               ref={inputRef}
               value={input}
@@ -110,13 +149,17 @@ export default function ChatWidget() {
               placeholder="Ask anything about cooking..."
               disabled={loading}
               className="flex-1 text-sm px-4 py-2.5 rounded-xl border outline-none transition-all"
-              style={{ borderColor: "var(--border)", backgroundColor: "var(--cream)", color: "var(--charcoal)" }}
+              style={{
+                borderColor: "var(--border)",
+                backgroundColor: "var(--cream)",
+                color: "var(--charcoal)",
+              }}
             />
             <button
               onClick={send}
               disabled={!input.trim() || loading}
-              className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 transition-all disabled:opacity-40"
-              style={{ backgroundColor: "var(--terracotta)" }}
+              className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-all disabled:opacity-40"
+              style={{ backgroundColor: "var(--terracotta)", border: "none", cursor: !input.trim() || loading ? "not-allowed" : "pointer" }}
             >
               <Send size={18} color="white" />
             </button>
