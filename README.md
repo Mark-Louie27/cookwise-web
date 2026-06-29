@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="public/cookwise_logo.svg" alt="CookWise Logo" width="80" />
+<img src="public/banner.png" alt="CookWise Logo" width="80" />
 
 # CookWise
 
