@@ -1,6 +1,6 @@
 "use client";
 
-import { Search, SlidersHorizontal, X, Sparkles } from "lucide-react";
+import { Search, SlidersHorizontal, X } from "lucide-react";
 import { useState, FormEvent, useRef, useEffect, KeyboardEvent } from "react";
 
 interface Props {
@@ -22,7 +22,28 @@ const DIETS = [
   { value: "gluten-free", label: "Gluten Free" },
 ];
 
-const QUICK_SEARCHES = ["Pasta", "Chicken Curry", "Vegan Tacos", "Quick Dinner", "Meal Prep"];
+const ALL_SUGGESTIONS = [
+  "Pasta",
+  "Chicken Curry",
+  "Vegan Tacos",
+  "Quick Dinner",
+  "Meal Prep",
+  "Beef Stew",
+  "Caesar Salad",
+  "Pancakes",
+  "Sushi",
+  "Ramen",
+  "Stir Fry",
+  "Avocado Toast",
+  "Smoothie Bowl",
+  "Fish Tacos",
+  "Lemon Chicken",
+  "Chocolate Cake",
+  "Veggie Burger",
+  "Fried Rice",
+  "Tomato Soup",
+  "Greek Salad",
+];
 
 export default function SearchBar({ initialQ = "", onSearch, loading }: Props) {
   const [q, setQ] = useState(initialQ);
@@ -30,15 +51,34 @@ export default function SearchBar({ initialQ = "", onSearch, loading }: Props) {
   const [diet, setDiet] = useState("");
   const [showFilters, setShowFilters] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
-  const [activeQuickIndex, setActiveQuickIndex] = useState(-1);
+  const [activeIndex, setActiveIndex] = useState(-1);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const hasFilters = mealType || diet;
+
+  // Filter suggestions based on query
+  const suggestions = q.trim()
+    ? ALL_SUGGESTIONS.filter(
+        (s) =>
+          s.toLowerCase().includes(q.toLowerCase()) &&
+          s.toLowerCase() !== q.toLowerCase(),
+      ).slice(0, 6)
+    : ALL_SUGGESTIONS.slice(0, 5);
+
+  const showDropdown = isFocused && suggestions.length > 0;
 
   const submit = (e?: FormEvent) => {
     e?.preventDefault();
     onSearch(q.trim() || "popular", mealType, diet);
     setIsFocused(false);
+    setActiveIndex(-1);
+  };
+
+  const selectSuggestion = (term: string) => {
+    setQ(term);
+    setActiveIndex(-1);
+    setIsFocused(false);
+    onSearch(term, mealType, diet);
   };
 
   const clearAll = () => {
@@ -49,24 +89,33 @@ export default function SearchBar({ initialQ = "", onSearch, loading }: Props) {
   };
 
   const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter") {
-      if (activeQuickIndex >= 0 && activeQuickIndex < QUICK_SEARCHES.length) {
-        setQ(QUICK_SEARCHES[activeQuickIndex]);
-        setActiveQuickIndex(-1);
+    if (!showDropdown) {
+      if (e.key === "Enter") submit();
+      return;
+    }
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setActiveIndex((prev) => (prev < suggestions.length - 1 ? prev + 1 : 0));
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setActiveIndex((prev) => (prev > 0 ? prev - 1 : suggestions.length - 1));
+    } else if (e.key === "Enter") {
+      e.preventDefault();
+      if (activeIndex >= 0) {
+        selectSuggestion(suggestions[activeIndex]);
       } else {
         submit();
       }
-    } else if (e.key === "ArrowDown") {
-      e.preventDefault();
-      setActiveQuickIndex((prev) => (prev < QUICK_SEARCHES.length - 1 ? prev + 1 : 0));
-    } else if (e.key === "ArrowUp") {
-      e.preventDefault();
-      setActiveQuickIndex((prev) => (prev > 0 ? prev - 1 : QUICK_SEARCHES.length - 1));
     } else if (e.key === "Escape") {
       setIsFocused(false);
-      setActiveQuickIndex(-1);
+      setActiveIndex(-1);
     }
   };
+
+  useEffect(() => {
+    // Reset active index when suggestions change
+    setActiveIndex(-1);
+  }, [q]);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -79,88 +128,121 @@ export default function SearchBar({ initialQ = "", onSearch, loading }: Props) {
   }, []);
 
   return (
-    <div style={{ width: "100%", display: "flex", flexDirection: "column", gap: "10px" }} data-search-container>
-      <form onSubmit={submit} style={{ width: "100%" }}>
-        <div style={{ display: "flex", gap: "8px", width: "100%", alignItems: "center" }}>
-
+    <div className="w-full flex flex-col gap-2.5" data-search-container>
+      <form onSubmit={submit} className="w-full">
+        <div className="flex gap-2 w-full items-center">
           {/* Main Input */}
-          <div style={{ position: "relative", flex: 1, minWidth: 0 }}>
+          <div className="relative flex-1 min-w-0">
             <div
-              style={{
-                position: "relative", display: "flex", alignItems: "center",
-                borderRadius: "10px",
-                border: `1.5px solid ${isFocused ? "var(--terracotta)" : "var(--border)"}`,
-                backgroundColor: "white",
-                transition: "border-color 0.2s, box-shadow 0.2s",
-                boxShadow: isFocused ? "0 0 0 3px rgba(196,97,58,0.12)" : "none",
-                height: "42px",
-              }}
+              className={`relative flex items-center rounded-[10px] bg-white h-[42px] transition-all duration-200 ${
+                isFocused
+                  ? "border-[1.5px] border-terracotta shadow-[0_0_0_3px_rgba(196,97,58,0.12)]"
+                  : "border-[1.5px] border-border-custom"
+              }`}
             >
               <Search
                 size={15}
-                style={{ position: "absolute", left: "12px", pointerEvents: "none", color: isFocused ? "var(--terracotta)" : "var(--soft-brown)", flexShrink: 0 }}
+                className={`absolute left-3 pointer-events-none shrink-0 transition-colors duration-200 ${
+                  isFocused ? "text-terracotta" : "text-soft-brown"
+                }`}
               />
               <input
                 ref={inputRef}
                 value={q}
-                onChange={(e) => { setQ(e.target.value); setActiveQuickIndex(-1); }}
+                onChange={(e) => setQ(e.target.value)}
                 onFocus={() => setIsFocused(true)}
                 onKeyDown={handleKeyDown}
                 placeholder="Search recipes, ingredients, cuisines..."
-                style={{
-                  width: "100%", paddingLeft: "36px", paddingRight: q ? "32px" : "12px",
-                  fontSize: "13px", outline: "none", background: "transparent",
-                  color: "var(--charcoal)", height: "100%", border: "none",
-                }}
+                className="w-full pl-9 pr-8 text-[13px] outline-none bg-transparent text-charcoal h-full border-none placeholder:text-soft-brown/50"
                 autoComplete="off"
               />
               {q && (
                 <button
                   type="button"
-                  onClick={() => { setQ(""); inputRef.current?.focus(); }}
-                  style={{ position: "absolute", right: "8px", padding: "4px", borderRadius: "6px", border: "none", background: "transparent", cursor: "pointer", display: "flex", alignItems: "center" }}
+                  onClick={() => {
+                    setQ("");
+                    inputRef.current?.focus();
+                  }}
+                  className="absolute right-2 p-1 rounded-md border-none bg-transparent cursor-pointer flex items-center"
                 >
-                  <X size={13} style={{ color: "var(--soft-brown)" }} />
+                  <X size={13} className="text-soft-brown" />
                 </button>
               )}
             </div>
 
-            {/* Quick Search Dropdown */}
-            {isFocused && !q && (
-              <div style={{
-                position: "absolute", top: "calc(100% + 6px)", left: 0, right: 0,
-                borderRadius: "12px", border: `1px solid var(--border)`,
-                overflow: "hidden", zIndex: 50, backgroundColor: "white",
-                boxShadow: "0 8px 24px rgba(0,0,0,0.1)",
-              }}>
-                <div style={{ padding: "10px 12px" }}>
-                  <p style={{ fontSize: "10px", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: "8px", color: "var(--soft-brown)" }}>
-                    Quick searches
+            {/* Suggestions Dropdown */}
+            {showDropdown && (
+              <div className="absolute top-[calc(100%+6px)] left-0 right-0 rounded-xl border border-border-custom overflow-hidden z-50 bg-white shadow-[0_8px_24px_rgba(0,0,0,0.1)]">
+                {/* Label */}
+                <div className="px-3 pt-2.5 pb-1">
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.07em] text-soft-brown">
+                    {q.trim() ? "Suggestions" : "Popular searches"}
                   </p>
-                  <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
-                    {QUICK_SEARCHES.map((term, idx) => (
-                      <button
-                        key={term} type="button"
-                        onClick={() => { setQ(term); inputRef.current?.focus(); }}
-                        style={{
-                          padding: "4px 10px", borderRadius: "6px", fontSize: "12px",
-                          border: `1px solid ${activeQuickIndex === idx ? "var(--terracotta)" : "var(--border)"}`,
-                          backgroundColor: activeQuickIndex === idx ? "rgba(196,97,58,0.08)" : "var(--cream)",
-                          color: activeQuickIndex === idx ? "var(--terracotta)" : "var(--charcoal)",
-                          cursor: "pointer", transition: "all 0.15s",
-                        }}
-                        onMouseEnter={() => setActiveQuickIndex(idx)}
-                        onMouseLeave={() => setActiveQuickIndex(-1)}
-                      >
-                        {term}
-                      </button>
-                    ))}
-                  </div>
                 </div>
-                <div style={{ padding: "8px 12px", borderTop: `1px solid var(--border)`, display: "flex", alignItems: "center", gap: "6px", fontSize: "11px", color: "var(--soft-brown)" }}>
-                  <kbd style={{ padding: "1px 5px", borderRadius: "4px", backgroundColor: "#f3f4f6", fontFamily: "monospace", fontSize: "10px" }}>↵</kbd> search
-                  <span style={{ margin: "0 2px", opacity: 0.5 }}>·</span>
-                  <kbd style={{ padding: "1px 5px", borderRadius: "4px", backgroundColor: "#f3f4f6", fontFamily: "monospace", fontSize: "10px" }}>esc</kbd> close
+
+                {/* Suggestion items */}
+                <ul className="py-1">
+                  {suggestions.map((term, idx) => {
+                    const isActive = activeIndex === idx;
+                    // Highlight matched part
+                    const lowerTerm = term.toLowerCase();
+                    const lowerQ = q.toLowerCase();
+                    const matchStart = lowerTerm.indexOf(lowerQ);
+                    const hasMatch = q.trim() && matchStart !== -1;
+
+                    return (
+                      <li key={term}>
+                        <button
+                          type="button"
+                          onMouseDown={(e) => {
+                            e.preventDefault();
+                            selectSuggestion(term);
+                          }}
+                          onMouseEnter={() => setActiveIndex(idx)}
+                          onMouseLeave={() => setActiveIndex(-1)}
+                          className={`w-full flex items-center gap-2.5 px-3 py-2 text-left text-[13px] cursor-pointer transition-colors duration-100 ${
+                            isActive
+                              ? "bg-cream text-terracotta"
+                              : "text-charcoal hover:bg-cream/60"
+                          }`}
+                        >
+                          <Search
+                            size={12}
+                            className={`shrink-0 ${isActive ? "text-terracotta" : "text-soft-brown"}`}
+                          />
+                          {hasMatch ? (
+                            <span>
+                              {term.slice(0, matchStart)}
+                              <span className="font-semibold text-terracotta">
+                                {term.slice(matchStart, matchStart + q.length)}
+                              </span>
+                              {term.slice(matchStart + q.length)}
+                            </span>
+                          ) : (
+                            <span>{term}</span>
+                          )}
+                        </button>
+                      </li>
+                    );
+                  })}
+                </ul>
+
+                {/* Keyboard hint */}
+                <div className="px-3 py-2 border-t border-border-custom flex items-center gap-1.5 text-[11px] text-soft-brown/70">
+                  <kbd className="px-1.5 py-px rounded bg-gray-100 font-mono text-[10px]">
+                    ↑↓
+                  </kbd>{" "}
+                  navigate
+                  <span className="mx-0.5 opacity-50">·</span>
+                  <kbd className="px-1.5 py-px rounded bg-gray-100 font-mono text-[10px]">
+                    ↵
+                  </kbd>{" "}
+                  select
+                  <span className="mx-0.5 opacity-50">·</span>
+                  <kbd className="px-1.5 py-px rounded bg-gray-100 font-mono text-[10px]">
+                    esc
+                  </kbd>{" "}
+                  close
                 </div>
               </div>
             )}
@@ -170,28 +252,22 @@ export default function SearchBar({ initialQ = "", onSearch, loading }: Props) {
           <button
             type="button"
             onClick={() => setShowFilters(!showFilters)}
-            style={{
-              position: "relative", flexShrink: 0,
-              height: "42px", padding: "0 14px",
-              borderRadius: "10px",
-              border: `1.5px solid ${showFilters ? "var(--terracotta)" : "var(--border)"}`,
-              backgroundColor: showFilters ? "var(--terracotta)" : "white",
-              color: showFilters ? "white" : "var(--soft-brown)",
-              cursor: "pointer", display: "flex", alignItems: "center", gap: "6px",
-              fontSize: "13px", fontWeight: 500, transition: "all 0.2s",
-              whiteSpace: "nowrap",
-            }}
+            className={`relative shrink-0 h-[42px] px-3.5 rounded-[10px] border-[1.5px] cursor-pointer flex items-center gap-1.5 text-[13px] font-medium whitespace-nowrap transition-all duration-200 ${
+              showFilters
+                ? "border-terracotta bg-terracotta text-white"
+                : "border-border-custom bg-white text-soft-brown"
+            }`}
           >
             <SlidersHorizontal size={14} />
             <span>Filters</span>
             {hasFilters && (
-              <span style={{
-                display: "inline-flex", alignItems: "center", justifyContent: "center",
-                width: "16px", height: "16px", borderRadius: "50%",
-                backgroundColor: showFilters ? "rgba(255,255,255,0.3)" : "var(--amber)",
-                color: showFilters ? "white" : "var(--charcoal)",
-                fontSize: "10px", fontWeight: 700,
-              }}>
+              <span
+                className={`inline-flex items-center justify-center w-4 h-4 rounded-full text-[10px] font-bold ${
+                  showFilters
+                    ? "bg-white/30 text-white"
+                    : "bg-amber text-charcoal"
+                }`}
+              >
                 {[mealType, diet].filter(Boolean).length}
               </span>
             )}
@@ -201,25 +277,13 @@ export default function SearchBar({ initialQ = "", onSearch, loading }: Props) {
           <button
             type="submit"
             disabled={loading}
-            style={{
-              flexShrink: 0, height: "42px", padding: "0 18px",
-              borderRadius: "10px", border: "none",
-              backgroundColor: "var(--terracotta)", color: "white",
-              fontSize: "13px", fontWeight: 600,
-              cursor: loading ? "not-allowed" : "pointer",
-              display: "flex", alignItems: "center", gap: "6px",
-              whiteSpace: "nowrap", transition: "opacity 0.2s, transform 0.15s",
-              boxShadow: "0 2px 8px rgba(196,97,58,0.3)",
-            }}
-            onMouseEnter={(e) => { if (!loading) e.currentTarget.style.opacity = "0.9"; }}
-            onMouseLeave={(e) => { e.currentTarget.style.opacity = "1"; }}
-            onMouseDown={(e) => { e.currentTarget.style.transform = "scale(0.97)"; }}
-            onMouseUp={(e) => { e.currentTarget.style.transform = "scale(1)"; }}
+            className="shrink-0 h-[42px] px-4 rounded-[10px] border-none bg-terracotta text-white text-[13px] font-semibold cursor-pointer flex items-center gap-1.5 whitespace-nowrap shadow-[0_2px_8px_rgba(196,97,58,0.3)] transition-all duration-200 hover:opacity-90 active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-70"
           >
-            {loading
-              ? <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-              : <Search size={14} />
-            }
+            {loading ? (
+              <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+            ) : (
+              <Search size={14} />
+            )}
             <span>{loading ? "Searching…" : "Search"}</span>
           </button>
         </div>
@@ -227,40 +291,43 @@ export default function SearchBar({ initialQ = "", onSearch, loading }: Props) {
 
       {/* Filters Panel */}
       {showFilters && (
-        <div style={{
-          borderRadius: "12px", border: `1px solid var(--border)`,
-          padding: "14px 16px", backgroundColor: "white",
-          boxShadow: "0 4px 16px rgba(0,0,0,0.06)",
-          display: "flex", flexDirection: "column", gap: "12px",
-        }}>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-            <span style={{ fontSize: "11px", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.07em", color: "var(--soft-brown)", display: "flex", alignItems: "center", gap: "6px" }}>
-              <SlidersHorizontal size={12} style={{ color: "var(--terracotta)" }} />
+        <div className="rounded-xl border border-border-custom p-3.5 bg-white shadow-[0_4px_16px_rgba(0,0,0,0.06)] flex flex-col gap-3">
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-semibold uppercase tracking-[0.07em] text-soft-brown flex items-center gap-1.5">
+              <SlidersHorizontal size={12} className="text-terracotta" />
               Filter options
             </span>
             {hasFilters && (
-              <button type="button" onClick={clearAll} style={{ fontSize: "11px", color: "var(--terracotta)", background: "none", border: "none", cursor: "pointer", textDecoration: "underline" }}>
+              <button
+                type="button"
+                onClick={clearAll}
+                className="text-[11px] text-terracotta bg-transparent border-none cursor-pointer underline"
+              >
                 Clear all
               </button>
             )}
           </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "12px" }}>
+          <div className="grid grid-cols-[repeat(auto-fit,minmax(180px,1fr))] gap-3">
             {/* Meal Type */}
             <div>
-              <p style={{ fontSize: "10px", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.07em", color: "var(--soft-brown)", marginBottom: "6px" }}>Meal type</p>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: "5px" }}>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.07em] text-soft-brown mb-1.5">
+                Meal type
+              </p>
+              <div className="flex flex-wrap gap-1">
                 {MEAL_TYPES.map((m) => {
                   const active = mealType === m;
                   return (
-                    <button key={m || "all-meals"} type="button" onClick={() => setMealType(active ? "" : m)}
-                      style={{
-                        padding: "3px 10px", borderRadius: "6px", fontSize: "12px", fontWeight: 500,
-                        border: `1px solid ${active ? "var(--terracotta)" : "var(--border)"}`,
-                        backgroundColor: active ? "rgba(196,97,58,0.08)" : "var(--cream)",
-                        color: active ? "var(--terracotta)" : "var(--charcoal)",
-                        cursor: "pointer", transition: "all 0.15s",
-                      }}>
+                    <button
+                      key={m || "all-meals"}
+                      type="button"
+                      onClick={() => setMealType(active ? "" : m)}
+                      className={`px-2.5 py-0.5 rounded-md text-xs font-medium border cursor-pointer transition-all duration-150 ${
+                        active
+                          ? "border-terracotta bg-terracotta/10 text-terracotta"
+                          : "border-border-custom bg-cream text-charcoal"
+                      }`}
+                    >
                       {m || "All"}
                     </button>
                   );
@@ -270,19 +337,23 @@ export default function SearchBar({ initialQ = "", onSearch, loading }: Props) {
 
             {/* Diet */}
             <div>
-              <p style={{ fontSize: "10px", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.07em", color: "var(--soft-brown)", marginBottom: "6px" }}>Dietary preference</p>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: "5px" }}>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.07em] text-soft-brown mb-1.5">
+                Dietary preference
+              </p>
+              <div className="flex flex-wrap gap-1">
                 {DIETS.map((d) => {
                   const active = diet === d.value;
                   return (
-                    <button key={d.value || "all-diets"} type="button" onClick={() => setDiet(active ? "" : d.value)}
-                      style={{
-                        padding: "3px 10px", borderRadius: "6px", fontSize: "12px", fontWeight: 500,
-                        border: `1px solid ${active ? "var(--terracotta)" : "var(--border)"}`,
-                        backgroundColor: active ? "rgba(196,97,58,0.08)" : "var(--cream)",
-                        color: active ? "var(--terracotta)" : "var(--charcoal)",
-                        cursor: "pointer", transition: "all 0.15s",
-                      }}>
+                    <button
+                      key={d.value || "all-diets"}
+                      type="button"
+                      onClick={() => setDiet(active ? "" : d.value)}
+                      className={`px-2.5 py-0.5 rounded-md text-xs font-medium border cursor-pointer transition-all duration-150 ${
+                        active
+                          ? "border-terracotta bg-terracotta/10 text-terracotta"
+                          : "border-border-custom bg-cream text-charcoal"
+                      }`}
+                    >
                       {d.label}
                     </button>
                   );
@@ -293,18 +364,30 @@ export default function SearchBar({ initialQ = "", onSearch, loading }: Props) {
 
           {/* Active filters */}
           {hasFilters && (
-            <div style={{ paddingTop: "10px", borderTop: `1px solid var(--border)`, display: "flex", alignItems: "center", gap: "6px", flexWrap: "wrap" }}>
-              <span style={{ fontSize: "11px", color: "var(--soft-brown)" }}>Active:</span>
+            <div className="pt-2.5 border-t border-border-custom flex items-center gap-1.5 flex-wrap">
+              <span className="text-[11px] text-soft-brown">Active:</span>
               {mealType && (
-                <span style={{ display: "inline-flex", alignItems: "center", gap: "3px", padding: "2px 8px", borderRadius: "6px", fontSize: "11px", fontWeight: 500, backgroundColor: "rgba(196,97,58,0.1)", color: "var(--terracotta)" }}>
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-medium bg-terracotta/10 text-terracotta">
                   {mealType}
-                  <button type="button" onClick={() => setMealType("")} style={{ background: "none", border: "none", cursor: "pointer", display: "flex", padding: 0 }}><X size={11} /></button>
+                  <button
+                    type="button"
+                    onClick={() => setMealType("")}
+                    className="bg-transparent border-none cursor-pointer flex p-0"
+                  >
+                    <X size={11} />
+                  </button>
                 </span>
               )}
               {diet && (
-                <span style={{ display: "inline-flex", alignItems: "center", gap: "3px", padding: "2px 8px", borderRadius: "6px", fontSize: "11px", fontWeight: 500, backgroundColor: "rgba(196,97,58,0.1)", color: "var(--terracotta)" }}>
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-medium bg-terracotta/10 text-terracotta">
                   {DIETS.find((d) => d.value === diet)?.label}
-                  <button type="button" onClick={() => setDiet("")} style={{ background: "none", border: "none", cursor: "pointer", display: "flex", padding: 0 }}><X size={11} /></button>
+                  <button
+                    type="button"
+                    onClick={() => setDiet("")}
+                    className="bg-transparent border-none cursor-pointer flex p-0"
+                  >
+                    <X size={11} />
+                  </button>
                 </span>
               )}
             </div>

@@ -1,117 +1,218 @@
-# 🍳 CookWise — AI-Powered Recipe & Cooking Tutorial App
+<div align="center">
 
-A full-stack Next.js web app with offline support, Edamam recipe search, and an AI cooking assistant powered by Groq.
+<img src="public/cookwise_logo.png" alt="CookWise Logo" width="80" />
+
+# CookWise
+
+**AI-powered recipe discovery & cooking assistant**
+
+[![Next.js](https://img.shields.io/badge/Next.js-15-black?style=flat-square&logo=next.js)](https://nextjs.org)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind-v4-38bdf8?style=flat-square&logo=tailwindcss)](https://tailwindcss.com)
+[![Groq](https://img.shields.io/badge/Groq-Llama_3.3_70B-f55036?style=flat-square)](https://groq.com)
+[![Edamam](https://img.shields.io/badge/Edamam-2.3M+_recipes-4caf50?style=flat-square)](https://developer.edamam.com)
+[![PWA](https://img.shields.io/badge/PWA-Offline_Ready-5a2d82?style=flat-square)](https://web.dev/progressive-web-apps)
+
+[Live Demo](#) · [Report Bug](#) · [Request Feature](#)
 
 ---
 
-## ✨ Features
+</div>
 
-| Feature | Details |
-|---|---|
-| 🔍 Recipe Search | Powered by Edamam (2.3M+ recipes), filterable by meal type & diet |
-| 🤖 AI Chef Assistant | Groq + Llama 3.3 70B — instant cooking help, tips, substitutions |
-| 📱 PWA / Offline | Installable on mobile, saved recipes work offline via IndexedDB |
-| 🔖 Save Recipes | Bookmark recipes locally, no account needed |
-| 🧑‍🍳 Interactive Ingredients | Check off ingredients while cooking |
-| 🎨 Beautiful UI | Custom design system with Tailwind CSS |
+## What is CookWise?
+
+CookWise is a full-stack recipe app that combines **2.3 million recipes** from Edamam with an **AI cooking assistant** powered by Groq's Llama 3.3 70B. Search by ingredient, diet, or meal type — then ask the AI chef anything: substitutions, techniques, macros, or what to cook with what's in your fridge.
+
+It works offline too. Save recipes to your device via IndexedDB and cook without a connection.
 
 ---
 
-## 🚀 Getting Started
+## Features
 
-### 1. Install dependencies
+|     | Feature                   | Description                                                                  |
+| --- | ------------------------- | ---------------------------------------------------------------------------- |
+| 🔍  | **Smart Recipe Search**   | Edamam API (2.3M+ recipes), filter by meal type & dietary preference         |
+| 🤖  | **AI Chef Assistant**     | Groq + Llama 3.3 70B — substitutions, tips, techniques, instant answers      |
+| 📱  | **PWA & Offline Mode**    | Installable on iOS/Android, saved recipes work without internet              |
+| 🔖  | **Save Recipes**          | Bookmark to IndexedDB — no account, no server, fully local                   |
+| ✅  | **Interactive Checklist** | Check off ingredients as you cook                                            |
+| 🎨  | **Custom Design System**  | Tailwind v4 with a warm food-forward palette and Playfair Display typography |
+| 💬  | **Floating Chat Widget**  | Ask cooking questions from any page without leaving your recipe              |
+
+---
+
+## Tech Stack
+
+| Layer           | Technology                                      |
+| --------------- | ----------------------------------------------- |
+| Framework       | Next.js 15 (App Router, Turbopack)              |
+| Styling         | Tailwind CSS v4 + custom `@theme` design tokens |
+| Recipe Data     | Edamam Recipe Search API v2                     |
+| AI              | Groq API · Llama 3.3 70B Versatile              |
+| Offline Storage | IndexedDB via custom `lib/db.ts`                |
+| PWA             | Web App Manifest + service worker               |
+| Language        | TypeScript                                      |
+
+---
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js 18+
+- A free [Edamam](https://developer.edamam.com/edamam-recipe-api) account
+- A free [Groq](https://console.groq.com) account
+
+### 1. Clone & install
+
 ```bash
+git clone https://github.com/your-username/cookwise.git
+cd cookwise/cookwise-web
 npm install
 ```
 
-### 2. Set up environment variables
+### 2. Configure environment variables
+
 ```bash
 cp .env.example .env.local
 ```
 
-Fill in your API keys in `.env.local`:
+Open `.env.local` and fill in your keys:
 
 ```env
-EDAMAM_APP_ID=your_app_id
-EDAMAM_APP_KEY=your_app_key
-GROQ_API_KEY=your_groq_key
+EDAMAM_APP_ID=your_edamam_app_id
+EDAMAM_APP_KEY=your_edamam_app_key
+GROQ_API_KEY=your_groq_api_key
 ```
 
-### 3. Get API Keys
+### 3. Get your API keys
 
-**Edamam** (Recipe Search):
-1. Go to https://developer.edamam.com/edamam-recipe-api
+<details>
+<summary><strong>Edamam (Recipe Search)</strong></summary>
+
+1. Visit [developer.edamam.com](https://developer.edamam.com/edamam-recipe-api)
 2. Sign up for a free account
-3. Create an app → get your App ID and App Key
-4. Use the **Recipe Search API v2** plan
+3. Create an application → copy your **App ID** and **App Key**
+4. Make sure you're on the **Recipe Search API v2** plan
 
-**Groq** (AI Chat):
-1. Go to https://console.groq.com
-2. Sign up (free, very fast inference)
-3. Create an API Key
+Free tier: ~10,000 calls/month
+
+</details>
+
+<details>
+<summary><strong>Groq (AI Chat)</strong></summary>
+
+1. Visit [console.groq.com](https://console.groq.com)
+2. Sign up (free, no credit card required)
+3. Navigate to **API Keys** → create a new key
+
+Free tier: very generous limits with extremely fast inference
+
+</details>
 
 ### 4. Run locally
+
 ```bash
 npm run dev
 ```
 
-Open http://localhost:3000
+Open [http://localhost:3000](http://localhost:3000)
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```
-cookwise/
+cookwise-web/
 ├── app/
 │   ├── api/
-│   │   ├── recipes/route.ts    # Edamam proxy
-│   │   └── chat/route.ts       # Groq AI chat
-│   ├── chat/page.tsx           # Full-screen AI chat
-│   ├── recipe/[id]/page.tsx    # Recipe detail page
-│   ├── saved/page.tsx          # Offline saved recipes
-│   ├── page.tsx                # Home / search
-│   ├── layout.tsx
-│   └── globals.css
+│   │   ├── chat/route.ts          # Groq AI proxy endpoint
+│   │   ├── recipes/route.ts       # Edamam recipe proxy + rate limiting
+│   │   └── quota/route.ts         # API call quota tracker
+│   ├── chat/
+│   │   └── page.tsx               # Full-screen AI chef chat
+│   ├── recipe/[id]/
+│   │   └── page.tsx               # Recipe detail view
+│   ├── saved/
+│   │   └── page.tsx               # Offline saved recipes
+│   ├── globals.css                # Tailwind v4 @theme design tokens
+│   ├── layout.tsx                 # Root layout + PWA metadata
+│   └── page.tsx                   # Home / search results
+│
 ├── components/
-│   ├── Navbar.tsx
-│   ├── RecipeCard.tsx
-│   ├── SearchBar.tsx
-│   └── ChatWidget.tsx          # Floating chat bubble
+│   ├── ChatWidget.tsx             # Floating AI chat bubble
+│   ├── Navbar.tsx                 # Sticky nav with scroll blur
+│   ├── QuotaIndicator.tsx         # API usage indicator
+│   ├── RecipeCard.tsx             # Recipe grid card with save/hover
+│   └── SearchBar.tsx              # Search + filters + autocomplete
+│
 ├── lib/
-│   └── db.ts                   # IndexedDB helpers
+│   ├── db.ts                      # IndexedDB save/load/delete helpers
+│   └── rateLimiter.ts             # Server-side rate limiting
+│
 ├── types/
-│   └── index.ts
+│   └── index.ts                   # Shared TypeScript types
+│
 └── public/
-    └── manifest.json           # PWA manifest
+    ├── manifest.json              # PWA manifest
+    └── cookwise_logo.png
 ```
 
 ---
 
-## 🛠 Tech Stack
+## Design System
 
-- **Framework**: Next.js 14 (App Router)
-- **Styling**: Tailwind CSS + custom CSS variables
-- **Recipe Data**: Edamam Recipe Search API v2
-- **AI**: Groq API (Llama 3.3 70B Versatile)
-- **Offline Storage**: IndexedDB (via custom lib/db.ts)
-- **PWA**: Web App Manifest + installable on mobile
+CookWise uses a custom Tailwind v4 `@theme` token system. All colors are named semantically and map directly to utility classes:
+
+```css
+@theme {
+  --color-forest: #2d4a3e; /* bg-forest    — primary brand green  */
+  --color-sage: #7a9e7e; /* bg-sage      — secondary accent     */
+  --color-amber: #e8a838; /* bg-amber     — highlight / CTA      */
+  --color-terracotta: #c4613a; /* bg-terracotta— interactive elements */
+  --color-cream: #faf7f2; /* bg-cream     — page background      */
+  --color-charcoal: #1c1c1a; /* text-charcoal— body text            */
+}
+```
+
+Typography: **Playfair Display** (headings) + **DM Sans** (body)
 
 ---
 
-## 🌐 Deploying to Vercel
+## Deploying to Vercel
 
 ```bash
 npm i -g vercel
 vercel
 ```
 
-Add your environment variables in the Vercel dashboard under **Settings → Environment Variables**.
+Then add your environment variables in the Vercel dashboard:
+**Project Settings → Environment Variables**
+
+| Variable         | Description            |
+| ---------------- | ---------------------- |
+| `EDAMAM_APP_ID`  | Edamam application ID  |
+| `EDAMAM_APP_KEY` | Edamam application key |
+| `GROQ_API_KEY`   | Groq API key           |
 
 ---
 
-## 📝 Notes
+## Notes & Limitations
 
-- Recipe detail pages use `sessionStorage` to pass data between list → detail. For fully standalone deep links, store recipe data in IndexedDB on card click.
-- The Edamam free tier allows ~10,000 calls/month.
-- Groq free tier provides very generous limits for Llama 3.3.
+- **Recipe deep links** — Recipe detail pages pass data via `sessionStorage`. For shareable URLs, consider persisting recipe data to IndexedDB on card click.
+- **Edamam free tier** — 10,000 calls/month. A built-in quota indicator shows your usage.
+- **Groq free tier** — Very generous. No quota concerns for personal use.
+- **PWA install** — Works on Chrome (Android) and Safari (iOS via "Add to Home Screen").
+
+---
+
+## License
+
+MIT — see [LICENSE](LICENSE) for details.
+
+---
+
+<div align="center">
+
+Built with ♥ using Next.js, Groq, and Edamam
+
+</div>

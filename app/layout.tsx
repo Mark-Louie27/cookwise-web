@@ -3,11 +3,12 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "CookWise – AI-Powered Recipe Finder",
-  description: "Discover recipes, get AI cooking help, and save favourites for offline use.",
+  description:
+    "Discover recipes, get AI cooking help, and save favourites for offline use.",
   manifest: "/manifest.json",
   appleWebApp: { capable: true, statusBarStyle: "default", title: "CookWise" },
   icons: {
-    icon: "/favicon.ico",          // browser tab icon
+    icon: "/favicon.ico", // browser tab icon
     apple: "/apple-touch-icon.png", // iOS home screen icon
   },
 };
@@ -16,12 +17,14 @@ export const viewport: Viewport = {
   themeColor: "#2D4A3E",
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <html lang="en">
-      <body className="min-h-screen" style={{ backgroundColor: "var(--cream)" }}>
-        {children}
-      </body>
+      <body className="min-h-screen bg-cream">{children}</body>
     </html>
   );
 }

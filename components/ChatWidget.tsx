@@ -7,7 +7,7 @@ function TypingDots() {
   return (
     <div className="flex items-center gap-1 py-1 dot-pulse">
       {[0, 1, 2].map((i) => (
-        <span key={i} className="w-2 h-2 rounded-full block" style={{ backgroundColor: "var(--sage)" }} />
+        <span key={i} className="w-2 h-2 rounded-full block bg-sage" />
       ))}
     </div>
   );
@@ -16,15 +16,24 @@ function TypingDots() {
 export default function ChatWidget() {
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([
-    { role: "assistant", content: "👋 Hi! I'm your AI cooking assistant. Ask me anything — ingredient swaps, cooking tips, or how to make a recipe healthier!" },
+    {
+      role: "assistant",
+      content:
+        "👋 Hi! I'm your AI cooking assistant. Ask me anything — ingredient swaps, cooking tips, or how to make a recipe healthier!",
+    },
   ]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages, loading]);
-  useEffect(() => { if (open) setTimeout(() => inputRef.current?.focus(), 150); }, [open]);
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages, loading]);
+
+  useEffect(() => {
+    if (open) setTimeout(() => inputRef.current?.focus(), 150);
+  }, [open]);
 
   const send = async () => {
     const text = input.trim();
@@ -40,9 +49,15 @@ export default function ChatWidget() {
         body: JSON.stringify({ messages: [...messages, userMsg] }),
       });
       const data = await res.json();
-      setMessages((m) => [...m, { role: "assistant", content: data.content || "Sorry, try again." }]);
+      setMessages((m) => [
+        ...m,
+        { role: "assistant", content: data.content || "Sorry, try again." },
+      ]);
     } catch {
-      setMessages((m) => [...m, { role: "assistant", content: "Network error. Please try again." }]);
+      setMessages((m) => [
+        ...m,
+        { role: "assistant", content: "Network error. Please try again." },
+      ]);
     } finally {
       setLoading(false);
     }
@@ -54,8 +69,7 @@ export default function ChatWidget() {
       {!open && (
         <button
           onClick={() => setOpen(true)}
-          className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full shadow-xl flex items-center justify-center transition-all hover:scale-110 active:scale-95"
-          style={{ backgroundColor: "var(--terracotta)", border: "none", cursor: "pointer" }}
+          className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full bg-terracotta shadow-xl flex items-center justify-center transition-all hover:scale-110 active:scale-95 border-none cursor-pointer"
         >
           <MessageCircle size={26} color="white" />
         </button>
@@ -63,72 +77,50 @@ export default function ChatWidget() {
 
       {/* Chat panel */}
       {open && (
-        <div
-          className="fixed bottom-6 right-6 z-50 rounded-2xl shadow-2xl overflow-hidden"
-          style={{
-            width: "360px",
-            maxWidth: "calc(100vw - 2rem)",
-            height: "520px",
-            backgroundColor: "white",
-            border: "1px solid var(--border)",
-            display: "flex",
-            flexDirection: "column",
-          }}
-        >
+        <div className="fixed bottom-6 right-6 z-50 w-[360px] max-w-[calc(100vw-2rem)] h-[520px] rounded-2xl shadow-2xl overflow-hidden bg-white border border-border-custom flex flex-col">
           {/* Header */}
-          <div
-            className="flex items-center gap-3 px-4 py-3 shrink-0"
-            style={{ backgroundColor: "var(--forest)" }}
-          >
-            <div
-              className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
-              style={{ backgroundColor: "var(--terracotta)" }}
-            >
+          <div className="flex items-center gap-3 px-4 py-3 shrink-0 bg-forest">
+            <div className="w-9 h-9 rounded-xl bg-terracotta flex items-center justify-center shrink-0">
               <ChefHat size={20} color="white" />
             </div>
-            <div style={{ flex: 1 }}>
-              <p className="text-white font-semibold text-sm">CookWise AI Chef</p>
-              <p className="text-xs" style={{ color: "rgba(255,255,255,0.6)" }}>Powered by Groq · Llama 3.3</p>
+            <div className="flex-1">
+              <p className="text-white font-semibold text-sm">
+                CookWise AI Chef
+              </p>
+              <p className="text-xs text-white/60">
+                Powered by Groq · Llama 3.3
+              </p>
             </div>
             <button
               onClick={() => setOpen(false)}
-              className="transition-colors hover:opacity-100"
-              style={{ color: "rgba(255,255,255,0.7)", background: "none", border: "none", cursor: "pointer", display: "flex" }}
+              className="text-white/70 hover:text-white transition-colors bg-transparent border-none cursor-pointer flex items-center"
             >
               <X size={20} />
             </button>
           </div>
 
           {/* Messages */}
-          <div
-            style={{ flex: 1, overflowY: "auto", padding: "16px", display: "flex", flexDirection: "column", gap: "12px" }}
-          >
+          <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-3 min-h-0">
             {messages.map((msg, i) => (
               <div
                 key={i}
-                className="animate-fadeUp"
-                style={{ display: "flex", justifyContent: msg.role === "user" ? "flex-end" : "flex-start" }}
+                className={`animate-fadeUp flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
               >
                 <div
-                  style={{
-                    maxWidth: "85%",
-                    padding: "12px 16px",
-                    borderRadius: "16px",
-                    fontSize: "14px",
-                    lineHeight: 1.6,
-                    whiteSpace: "pre-wrap",
-                    ...(msg.role === "user"
-                      ? { backgroundColor: "var(--forest)", color: "white", borderBottomRightRadius: "4px" }
-                      : { backgroundColor: "var(--cream)", color: "var(--charcoal)", borderBottomLeftRadius: "4px" }),
-                  }}
+                  className={`max-w-[85%] px-4 py-3 text-sm leading-relaxed whitespace-pre-wrap ${
+                    msg.role === "user"
+                      ? "bg-forest text-white rounded-2xl rounded-br-sm"
+                      : "bg-cream text-charcoal rounded-2xl rounded-bl-sm"
+                  }`}
                 >
                   {msg.content}
                 </div>
               </div>
             ))}
+
             {loading && (
-              <div style={{ display: "flex", justifyContent: "flex-start" }}>
-                <div style={{ padding: "12px 16px", borderRadius: "16px", borderBottomLeftRadius: "4px", backgroundColor: "var(--cream)" }}>
+              <div className="flex justify-start">
+                <div className="px-4 py-3 rounded-2xl rounded-bl-sm bg-cream">
                   <TypingDots />
                 </div>
               </div>
@@ -137,29 +129,22 @@ export default function ChatWidget() {
           </div>
 
           {/* Input */}
-          <div
-            className="shrink-0 flex gap-2 px-4 py-3 border-t"
-            style={{ borderColor: "var(--border)" }}
-          >
+          <div className="shrink-0 flex gap-2 px-4 py-3 border-t border-border-custom">
             <input
               ref={inputRef}
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              onKeyDown={(e) => { if (e.key === "Enter") send(); }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") send();
+              }}
               placeholder="Ask anything about cooking..."
               disabled={loading}
-              className="flex-1 text-sm px-4 py-2.5 rounded-xl border outline-none transition-all"
-              style={{
-                borderColor: "var(--border)",
-                backgroundColor: "var(--cream)",
-                color: "var(--charcoal)",
-              }}
+              className="flex-1 text-sm px-4 py-2.5 rounded-xl border border-border-custom outline-none transition-all bg-cream text-charcoal placeholder:text-soft-brown/50 disabled:opacity-50"
             />
             <button
               onClick={send}
               disabled={!input.trim() || loading}
-              className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-all disabled:opacity-40"
-              style={{ backgroundColor: "var(--terracotta)", border: "none", cursor: !input.trim() || loading ? "not-allowed" : "pointer" }}
+              className="w-10 h-10 rounded-xl bg-terracotta flex items-center justify-center shrink-0 transition-all disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer border-none"
             >
               <Send size={18} color="white" />
             </button>
